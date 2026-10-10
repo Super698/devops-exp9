@@ -3,17 +3,22 @@ version: 0.2
 phases:
   pre_build:
     commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_URI
       - echo Installing test dependencies...
       - pip install pytest flake8
-      - echo Running Python linting...
+      - echo Running linting...
       - flake8 app.py
       - echo Running unit tests...
       - pytest test_app.py
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t devops-exp9:latest .
+      - IMAGE_TAG=$CODEBUILD_RESOLVED_COMMIT_ID
+      - docker build -t $ECR_URI:latest .
+      - docker tag $ECR_URI:latest $ECR_URI:$IMAGE_TAG
   post_build:
     commands:
-      - echo Docker build completed successfully!
-      - docker images
+      - echo Pushing Docker images to ECR...
+      - docker push $ECR_URI:latest
+      - docker push $ECR_URI:$IMAGE_TAG
