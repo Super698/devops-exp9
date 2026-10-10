@@ -1,6 +1,5 @@
-def add(a, b):
-    return a + b
+from app import add
 
 
-if __name__ == "__main__":
-    print(f"2 + 3 = {add(2, 3)}")
+def test_add():
+    assert add(2, 3) == 999  # Intentionally failing test
